@@ -1,0 +1,26 @@
+name: Notify wiki change
+
+on:
+  gollum
+  
+
+jobs:
+  notify-on-slack:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{github.repository}}.wiki
+    - name: set log env
+      run: |
+        echo "LAST_COMMIT='$(git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -1)'" >> $GITHUB_ENV
+    - name: test
+      run: echo ${{ env.LAST_COMMIT }}
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_MESSAGE: ${{ env.LAST_COMMIT }}
+        SLACK_TITLE: 'Notificación de cambio en la wiki'
+        MSG_MINIMAL: true
+  
